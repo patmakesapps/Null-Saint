@@ -1,16 +1,22 @@
 # Null Saint
 
+![Null Saint hero render](docs/images/null_saint1.png)
+
 A side-view action game project built in **Unity 6000.0.40f1**.
 
 ## Visual Direction
 
 Dark fantasy side-view action with a small cloaked hero, glowing violet magic, ruined stone platforms, ghost enemies, and a mist-heavy purple atmosphere.
 
-Local concept renders are kept outside version control in:
+The README includes selected tracked render copies in `docs/images/`. The full local render workspace stays ignored at:
 
 ```text
 Renders/insane renders/
 ```
+
+| Hero | Close Combat Mood | Character Detail |
+| --- | --- | --- |
+| ![Null Saint hero render](docs/images/null_saint1.png) | ![Null Saint combat mood render](docs/images/null_saint3.png) | ![Null Saint character detail render](docs/images/null_saint4.png) |
 
 ## Workspace Layout
 
