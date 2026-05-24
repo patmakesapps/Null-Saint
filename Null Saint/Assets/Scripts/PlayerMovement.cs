@@ -58,6 +58,7 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Feedback")]
     public AudioSource audioSource;
+    public AudioSource movementAudioSource;
     public GameplayFeedback walkFeedback;
     public GameplayFeedback runFeedback;
     public GameplayFeedback jumpFeedback;
@@ -65,8 +66,6 @@ public class PlayerMovement : MonoBehaviour
     public GameplayFeedback slashSpinFeedback;
     public GameplayFeedback powerFeedback;
     public GameplayFeedback blockStartFeedback;
-    public float walkStepInterval = 0.45f;
-    public float runStepInterval = 0.28f;
     public float actionAnimationTimeout = 1.15f;
 
     private CharacterController controller;
@@ -80,7 +79,6 @@ public class PlayerMovement : MonoBehaviour
     private bool groundedForCamera = true;
     private Collider[] ownColliders;
     private int visualAlignmentFramesRemaining;
-    private float nextStepFeedbackTime;
     private bool wasBlocking;
     private float actionAnimationEndTime;
     private float actionInputUnlockTime;
@@ -112,6 +110,14 @@ public class PlayerMovement : MonoBehaviour
                 audioSource.playOnAwake = false;
                 audioSource.spatialBlend = 1f;
             }
+        }
+
+        if (movementAudioSource == null)
+        {
+            movementAudioSource = gameObject.AddComponent<AudioSource>();
+            movementAudioSource.playOnAwake = false;
+            movementAudioSource.loop = true;
+            movementAudioSource.spatialBlend = audioSource != null ? audioSource.spatialBlend : 1f;
         }
 
         if (visualRoot == null && animator != null && animator.transform != transform)
@@ -220,7 +226,7 @@ public class PlayerMovement : MonoBehaviour
         groundedForCamera = controller.isGrounded || IsGroundClose();
 
         float animSpeed = Mathf.Abs(horizontalVelocity) / Mathf.Max(walkSpeed, 0.001f);
-        UpdateStepFeedback(animSpeed, isRunning);
+        UpdateMovementLoopFeedback(animSpeed, isRunning);
         UpdateBlockFeedback(blocking);
 
         if (animator != null)
@@ -374,28 +380,50 @@ public class PlayerMovement : MonoBehaviour
         return ProbeGround(out _, groundProbeDistance);
     }
 
-    private void UpdateStepFeedback(float animSpeed, bool isRunning)
+    private void OnDisable()
     {
-        if (!groundedForCamera || animSpeed <= 0.05f)
+        StopMovementLoop();
+    }
+
+    private void UpdateMovementLoopFeedback(float animSpeed, bool isRunning)
+    {
+        if (!groundedForCamera || animSpeed <= 0.05f || movementAudioSource == null)
+        {
+            StopMovementLoop();
+            return;
+        }
+
+        GameplayFeedback feedback = isRunning ? runFeedback : walkFeedback;
+
+        if (feedback == null || feedback.audioClip == null)
+        {
+            StopMovementLoop();
+            return;
+        }
+
+        if (movementAudioSource.clip != feedback.audioClip)
+        {
+            movementAudioSource.clip = feedback.audioClip;
+            movementAudioSource.volume = feedback.volume;
+            movementAudioSource.loop = true;
+            movementAudioSource.Play();
+        }
+        else if (!movementAudioSource.isPlaying)
+        {
+            movementAudioSource.Play();
+        }
+
+        movementAudioSource.volume = feedback.volume;
+    }
+
+    private void StopMovementLoop()
+    {
+        if (movementAudioSource == null || !movementAudioSource.isPlaying)
         {
             return;
         }
 
-        if (Time.time < nextStepFeedbackTime)
-        {
-            return;
-        }
-
-        if (isRunning)
-        {
-            PlayFeedback(runFeedback);
-            nextStepFeedbackTime = Time.time + runStepInterval;
-        }
-        else
-        {
-            PlayFeedback(walkFeedback);
-            nextStepFeedbackTime = Time.time + walkStepInterval;
-        }
+        movementAudioSource.Stop();
     }
 
     private void UpdateBlockFeedback(bool blocking)
