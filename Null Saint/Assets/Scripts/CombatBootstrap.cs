@@ -27,6 +27,11 @@ public static class CombatBootstrap
             {
                 candidate.AddComponent<EnemyGhostCombat>();
             }
+
+            if (candidate.GetComponentInParent<EnemyGhostMovement>() == null)
+            {
+                candidate.AddComponent<EnemyGhostMovement>();
+            }
         }
     }
 }

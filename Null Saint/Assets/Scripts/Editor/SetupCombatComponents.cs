@@ -49,6 +49,7 @@ public static class SetupCombatComponents
             }
 
             EnsureComponent<EnemyGhostCombat>(candidate);
+            EnsureComponent<EnemyGhostMovement>(candidate);
             EditorUtility.SetDirty(candidate);
         }
     }
@@ -64,6 +65,7 @@ public static class SetupCombatComponents
         }
 
         EnsureComponent<EnemyGhostCombat>(prefabRoot);
+        EnsureComponent<EnemyGhostMovement>(prefabRoot);
         PrefabUtility.SaveAsPrefabAsset(prefabRoot, EnemyPrefabPath);
         PrefabUtility.UnloadPrefabContents(prefabRoot);
     }

@@ -15,6 +15,7 @@ public class EnemyGhostCombat : MonoBehaviour
     public float projectileRadius = 0.22f;
     public Vector3 projectileSpawnOffset = new Vector3(0f, 0.4f, 0f);
     public Color projectileColor = new Color(0.75f, 0.2f, 1f, 1f);
+    public bool requireMovementAwarenessForShooting = true;
 
     [Header("Feedback")]
     public AudioSource audioSource;
@@ -25,11 +26,16 @@ public class EnemyGhostCombat : MonoBehaviour
     public GameplayFeedback projectileSlashedFeedback;
 
     private Transform player;
+    private EnemyGhostMovement movement;
     private float nextShotTime;
     private bool dead;
+    private bool wasReadyToShoot;
+
+    public bool IsDead => dead;
 
     private void Awake()
     {
+        movement = GetComponent<EnemyGhostMovement>();
         EnsurePhysicsSetup();
         EnsureAudioSource();
     }
@@ -38,6 +44,7 @@ public class EnemyGhostCombat : MonoBehaviour
     {
         PlayerMovement playerMovement = FindFirstObjectByType<PlayerMovement>();
         player = playerMovement != null ? playerMovement.transform : null;
+        movement = movement != null ? movement : GetComponent<EnemyGhostMovement>();
         nextShotTime = Time.time + firstShotDelay + Random.Range(0f, 0.5f);
     }
 
@@ -46,6 +53,20 @@ public class EnemyGhostCombat : MonoBehaviour
         if (dead || player == null)
         {
             return;
+        }
+
+        bool readyToShoot = !requireMovementAwarenessForShooting || movement == null || movement.IsAwareOfPlayer;
+
+        if (!readyToShoot)
+        {
+            wasReadyToShoot = false;
+            return;
+        }
+
+        if (!wasReadyToShoot)
+        {
+            nextShotTime = Time.time + firstShotDelay + Random.Range(0f, 0.25f);
+            wasReadyToShoot = true;
         }
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
