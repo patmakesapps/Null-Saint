@@ -62,6 +62,7 @@ public class PlayerMovement : MonoBehaviour
     public GameplayFeedback walkFeedback;
     public GameplayFeedback runFeedback;
     public GameplayFeedback jumpFeedback;
+    public GameplayFeedback doubleJumpFeedback;
     public GameplayFeedback slashFeedback;
     public GameplayFeedback slashSpinFeedback;
     public GameplayFeedback powerFeedback;
@@ -177,12 +178,13 @@ public class PlayerMovement : MonoBehaviour
 
         if (jumpPressed && jumpsRemaining > 0)
         {
-            float currentJumpHeight = jumpsRemaining == maxJumps ? jumpHeight : doubleJumpHeight;
+            bool firstJump = jumpsRemaining == maxJumps;
+            float currentJumpHeight = firstJump ? jumpHeight : doubleJumpHeight;
             verticalVelocity = Mathf.Sqrt(currentJumpHeight * -2f * gravity);
             jumpsRemaining--;
             didJump = true;
             cameraFollow?.PulseZoom();
-            PlayFeedback(jumpFeedback);
+            PlayFeedback(firstJump ? jumpFeedback : doubleJumpFeedback);
         }
 
         float controlMultiplier = grounded ? 1f : airControl;
