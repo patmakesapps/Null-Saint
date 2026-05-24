@@ -72,6 +72,9 @@ crashlytics-build.properties
 *.blend@
 *.blend~
 blender_autosave/
+/Blender Sessions/
+/Null Saint game character/
+/Renders/insane renders/
 
 # ===== OS =====
 .DS_Store
